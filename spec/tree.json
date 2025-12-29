@@ -1,0 +1,185 @@
+{
+  "tree_version": 1,
+  "project": {
+    "name": "BridgeAI",
+    "summary": "LLM↔repo bridge: validates and executes change packets on code+docs, can run commands and git commit, returns machine-readable reports, and later supports anchor-based edits and optional CodeAtlas integration."
+  },
+  "nodes": [
+    {
+      "id": "P0",
+      "type": "project",
+      "path": ".",
+      "summary": "Root: CLI `bridge apply` + packet schema + applier engine + tests. Later: anchor edits, logs, CodeAtlas hooks.",
+      "children": ["F_pyproject", "F_readme", "F_pkg_init", "F_cli", "F_schema", "F_apply", "F_tests"],
+      "ext": {}
+    },
+
+    {
+      "id": "F_pyproject",
+      "type": "file",
+      "path": "pyproject.toml",
+      "summary": "Packaging config. Defines console script `bridge` and dev deps (pytest).",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "F_readme",
+      "type": "file",
+      "path": "README.md",
+      "summary": "User documentation: what BridgeAI does, how packets look, examples, and workflow.",
+      "children": [],
+      "ext": {}
+    },
+
+    {
+      "id": "F_pkg_init",
+      "type": "file",
+      "path": "bridgeai/__init__.py",
+      "summary": "Package version and minimal exports.",
+      "children": ["B_version"],
+      "ext": {}
+    },
+    {
+      "id": "B_version",
+      "type": "block",
+      "path": "bridgeai/__init__.py",
+      "anchor": "__version__",
+      "summary": "Define __version__ string.",
+      "children": [],
+      "ext": {}
+    },
+
+    {
+      "id": "F_cli",
+      "type": "file",
+      "path": "bridgeai/cli.py",
+      "summary": "CLI entrypoint. Reads packet JSON (file/stdin), calls apply engine, prints JSON report.",
+      "children": ["B_cli_main", "B_cli_read_packet"],
+      "ext": {}
+    },
+    {
+      "id": "B_cli_main",
+      "type": "block",
+      "path": "bridgeai/cli.py",
+      "anchor": "main",
+      "summary": "Argparse command `bridge apply`; routes to apply_packet and prints report.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_cli_read_packet",
+      "type": "block",
+      "path": "bridgeai/cli.py",
+      "anchor": "_read_packet",
+      "summary": "Load JSON packet from file path or stdin ('-'); return dict.",
+      "children": [],
+      "ext": {}
+    },
+
+    {
+      "id": "F_schema",
+      "type": "file",
+      "path": "bridgeai/schema.py",
+      "summary": "Packet schema validation. Checks packet version, op types, required fields, and value constraints; returns (ok, errors).",
+      "children": ["B_validate_packet", "B_supported_ops"],
+      "ext": {}
+    },
+    {
+      "id": "B_supported_ops",
+      "type": "block",
+      "path": "bridgeai/schema.py",
+      "anchor": "SUPPORTED_OPS",
+      "summary": "Set/list of supported operation names for v1 (create_file, delete_path, replace_file, replace_text).",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_validate_packet",
+      "type": "block",
+      "path": "bridgeai/schema.py",
+      "anchor": "validate_packet",
+      "summary": "Validate packet structure and ops; return (bool_ok, list_errors).",
+      "children": [],
+      "ext": {}
+    },
+
+    {
+      "id": "F_apply",
+      "type": "file",
+      "path": "bridgeai/apply.py",
+      "summary": "Applier engine. Applies ops to filesystem with optional preconditions, runs optional commands, optionally performs git add/commit, returns structured report.",
+      "children": ["B_apply_packet", "B_apply_one_op", "B_hash", "B_run_cmd", "B_git_commit"],
+      "ext": {}
+    },
+    {
+      "id": "B_hash",
+      "type": "block",
+      "path": "bridgeai/apply.py",
+      "anchor": "sha256_text",
+      "summary": "Compute sha256:... for a UTF-8 string; used for expect_sha256 preconditions.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_run_cmd",
+      "type": "block",
+      "path": "bridgeai/apply.py",
+      "anchor": "run_cmd",
+      "summary": "Run shell command in repo root; capture stdout/stderr/return code for report.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_apply_one_op",
+      "type": "block",
+      "path": "bridgeai/apply.py",
+      "anchor": "apply_one_op",
+      "summary": "Execute one op (create/delete/replace_file/replace_text) with optional expect_sha256 precondition.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_git_commit",
+      "type": "block",
+      "path": "bridgeai/apply.py",
+      "anchor": "git_commit_if_requested",
+      "summary": "If packet.git present and repo is git, run git add and git commit; capture output in report.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "B_apply_packet",
+      "type": "block",
+      "path": "bridgeai/apply.py",
+      "anchor": "apply_packet",
+      "summary": "Validate packet, apply ops sequentially (fail-fast), run commands, optionally git commit, return report dict.",
+      "children": [],
+      "ext": {}
+    },
+
+    {
+      "id": "F_tests",
+      "type": "file_group",
+      "path": "tests/",
+      "summary": "Test suite: smoke import test and packet application tests in temp dirs.",
+      "children": ["T_smoke", "T_apply_basic"],
+      "ext": {}
+    },
+    {
+      "id": "T_smoke",
+      "type": "file",
+      "path": "tests/test_smoke.py",
+      "summary": "Imports bridgeai and checks version exists.",
+      "children": [],
+      "ext": {}
+    },
+    {
+      "id": "T_apply_basic",
+      "type": "file",
+      "path": "tests/test_apply_basic.py",
+      "summary": "Applies a packet: create_file -> replace_text -> delete_path; asserts ok and outcomes.",
+      "children": [],
+      "ext": {}
+    }
+  ]
+}
